@@ -3,9 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from math import sqrt
 
-def scaled_dot_product_attention(query, key, value):
+def scaled_dot_product_attention(query, key, value, mask=None):
     dim_k = key.size(-1) # the embeddings length
     scores = torch.bmm(query, key.transpose(1,2)) / sqrt(dim_k)
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -float("inf"))
     weights = F.softmax(scores, dim=-1) # along columns of the score matrix
     return torch.bmm(weights, value)
 
